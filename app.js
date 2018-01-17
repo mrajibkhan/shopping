@@ -8,6 +8,8 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var catalogs = require('./routes/catalogs');
 
+var catalogProxy = require('./catalog_grpc');
+
 var app = express();
 
 // view engine setup
@@ -23,7 +25,18 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use('/catalogs', catalogs);
+app.use('/catalogs-local', catalogs);
+
+app.get('/catalogs', function(req, res) {
+   catalogProxy.getCatalogs(function (err, data) {
+   if(err) {
+       console.log("Couldn't retrieve catalogs. Error: ", err);
+       res.send({error: err});
+   }
+       res.send(data);
+   });
+
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
