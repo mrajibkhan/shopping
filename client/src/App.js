@@ -1,14 +1,27 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React, { Component} from 'react';
+// import logo from './logo.svg';
 import './App.css';
+import CatalogList from "./CatalogList";
 
-class App extends Component {
-  state = {catalogs: []}
+import { addCatalogs } from "./js/actions/catalogActions";
+import {connect} from "react-redux";
+
+const mapDispatchToProps = dispatch => {
+    return {
+        addCatalogs: catalogs => dispatch(addCatalogs(catalogs))
+    };
+};
+
+const mapStateToProps = state => {
+    return { catalogs: state.catalogs }
+};
+
+class ConnectedApp extends Component {
 
   componentDidMount() {
     fetch('/catalogs')
       .then(res => res.json())
-      .then(catalogs => this.setState({ catalogs }));
+      .then(catalogs => this.props.addCatalogs(catalogs));
   }
 
   render() {
@@ -16,15 +29,15 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           {/*<img src={logo} className="App-logo" alt="logo" />*/}
-          <h1 className="App-title">online shopping portal</h1>
+          <h1 className="App-title">Online Shopping Portal (React, Redux, gRPC example)</h1>
         </header>
         <h2>Catalogs</h2>
-        {this.state.catalogs.map(catalog =>
-          <div key={catalog.catalogId}>{catalog.catalogName}</div>
-        )}
+          <CatalogList />
       </div>
     );
   }
 }
+
+const App = connect(mapStateToProps, mapDispatchToProps)(ConnectedApp);
 
 export default App;
